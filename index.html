@@ -133,7 +133,7 @@
                 <div class="flex flex-1 justify-end gap-8">
                     <nav class="flex items-center gap-9">
                         <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Dashboard</a>
-                        <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">My Library</a>
+                        <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors cursor-pointer" onclick="openLibrary()">My Library</a>
                         <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Templates</a>
                     </nav>
                     <div class="flex items-center gap-4">
@@ -391,7 +391,7 @@
                 <div class="flex flex-1 justify-end gap-8">
                     <div class="flex items-center gap-9">
                         <a class="text-white/80 hover:text-white text-sm font-medium transition-colors cursor-pointer" onclick="navigateView('workspace')">Back to Workspace</a>
-                        <a class="text-white/80 hover:text-white text-sm font-medium transition-colors" href="#">My Library</a>
+                        <a class="text-white/80 hover:text-white text-sm font-medium transition-colors cursor-pointer" onclick="openLibrary()">My Library</a>
                     </div>
                 </div>
             </header>
@@ -537,7 +537,7 @@
                         <h2 class="text-xl font-bold tracking-tight">CurriculumHub</h2>
                     </div>
                     <div class="hidden md:flex items-center gap-6">
-                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Library</a>
+                        <a class="text-sm font-medium hover:text-primary transition-colors cursor-pointer" onclick="openLibrary()">Library</a>
                         <a class="text-sm font-medium hover:text-primary transition-colors" href="#">My Courses</a>
                         <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Community</a>
                     </div>
@@ -670,6 +670,67 @@
                 </div>
             </div>
         </footer>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW 5: MY LIBRARY                                           -->
+<!-- ============================================================ -->
+<div id="view-library" class="view flex-col min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col bg-navy overflow-none">
+        <!-- Optional Decorative Blurs -->
+        <div class="fixed top-0 left-0 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        <div class="fixed bottom-0 right-0 w-96 h-96 bg-purple-deep/40 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+        <div class="layout-container flex h-full grow flex-col z-10">
+            <!-- Nav -->
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-lavender-border px-10 py-4 bg-navy/80 backdrop-blur-md sticky top-0 z-50">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+                        <span class="material-symbols-outlined">auto_stories</span>
+                    </div>
+                    <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em] cursor-pointer" onclick="handleCreateNew()">Curricula</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8">
+                    <nav class="flex items-center gap-9">
+                        <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors cursor-pointer" onclick="handleCreateNew()">Create New</a>
+                        <a class="text-white text-sm font-bold transition-colors border-b-2 border-primary pb-1" href="#">My Library</a>
+                    </nav>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col py-12 px-10 xl:px-20 max-w-[1400px] mx-auto w-full">
+                <div class="flex flex-col gap-2 mb-10">
+                    <h1 class="text-white text-4xl font-black tracking-tight flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-4xl">local_library</span>
+                        My Library
+                    </h1>
+                    <p class="text-lavender text-lg">Manage and review your saved curricula.</p>
+                </div>
+
+                <!-- Filters & Search Bar (Placeholder) -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+                    <div class="flex gap-2">
+                        <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-primary/20">All</button>
+                        <button class="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-medium border border-white/10 transition-all">Published</button>
+                        <button class="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-medium border border-white/10 transition-all">Drafts</button>
+                    </div>
+                    <div class="relative w-full md:w-64">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                        <input type="text" placeholder="Search library..." class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-lg pl-10 pr-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"/>
+                    </div>
+                </div>
+
+                <!-- Grid -->
+                <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Loading State -->
+                    <div class="col-span-full flex flex-col justify-center items-center py-20 text-lavender">
+                        <span class="material-symbols-outlined text-4xl animate-spin text-primary mb-4">progress_activity</span>
+                        <p class="font-medium">Loading your library...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 </div>
 
@@ -1296,6 +1357,146 @@ Please generate a detailed, structured curriculum.`;
         } else {
             alert('Curriculum bookmarked!');
         }
+    }
+
+    // ---- LIBRARY ----
+    async function openLibrary() {
+        navigateView('library');
+        fetchLibrary();
+    }
+
+    async function fetchLibrary() {
+        const gridEl = document.getElementById('library-grid');
+        gridEl.innerHTML = `
+            <div class="col-span-full flex flex-col justify-center items-center py-20 text-lavender">
+                <span class="material-symbols-outlined text-4xl animate-spin text-primary mb-4">progress_activity</span>
+                <p class="font-medium">Loading your curricula...</p>
+            </div>
+        `;
+
+        // If no supabase, show fallback or check localStorage
+        if (!supabaseClient) {
+            const localDataStr = localStorage.getItem('published_curriculum');
+            if (localDataStr) {
+                renderLibrary([JSON.parse(localDataStr)]);
+            } else {
+                renderEmptyLibrary();
+            }
+            return;
+        }
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('curricula')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                // Store in state so we can easily open them
+                state.libraryCache = data;
+                renderLibrary(data);
+            } else {
+                renderEmptyLibrary();
+            }
+        } catch (err) {
+            console.error('Error fetching library:', err);
+            gridEl.innerHTML = `
+                <div class="col-span-full flex flex-col justify-center items-center py-20 text-red-400">
+                    <span class="material-symbols-outlined text-4xl mb-4">error</span>
+                    <p class="font-medium">Failed to load library.</p>
+                    <p class="text-sm mt-2">${err.message}</p>
+                    <button onclick="fetchLibrary()" class="mt-4 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold text-white transition-all">Try Again</button>
+                </div>
+            `;
+        }
+    }
+
+    function renderEmptyLibrary() {
+        const gridEl = document.getElementById('library-grid');
+        gridEl.innerHTML = `
+            <div class="col-span-full flex flex-col justify-center items-center py-24 text-lavender bg-purple-card/30 rounded-2xl border border-white/5 border-dashed">
+                <div class="size-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-3xl">auto_stories</span>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">No Curricula Found</h3>
+                <p class="text-center max-w-sm mb-6 text-sm">Your library is currently empty. Generate your first curriculum to see it here.</p>
+                <button onclick="handleCreateNew()" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    Create New Curriculum
+                </button>
+            </div>
+        `;
+    }
+
+    function renderLibrary(curricula) {
+        const gridEl = document.getElementById('library-grid');
+        gridEl.innerHTML = curricula.map(curr => {
+            const dateStr = new Date(curr.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            return `
+                <div class="bg-purple-card/60 backdrop-blur-sm border border-white/10 rounded-2xl p-5 flex flex-col hover:border-primary/50 transition-colors group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="bg-primary/20 p-2 rounded-xl">
+                            <span class="material-symbols-outlined text-primary text-xl">school</span>
+                        </div>
+                        <span class="text-xs font-bold px-2 py-1 rounded bg-white/5 text-lavender group-hover:bg-primary/20 group-hover:text-primary transition-colors cursor-pointer flex items-center gap-1" onclick="openFromLibrary('${curr.id}')">
+                            <span class="material-symbols-outlined text-[14px]">edit</span> Edit
+                        </span>
+                    </div>
+                    <h3 class="text-white font-bold text-lg leading-tight mb-2 line-clamp-2" title="${curr.title.replace(/"/g, '&quot;')}">${curr.title}</h3>
+                    <p class="text-lavender/70 text-sm line-clamp-3 mb-4 flex-1">${curr.description || 'No description provided.'}</p>
+                    <div class="h-px w-full bg-white/5 mb-4"></div>
+                    <div class="flex items-center justify-between mt-auto">
+                        <div class="flex gap-3 text-lavender/50 text-xs font-medium">
+                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> ${curr.duration || 'N/A'}</span>
+                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">signal_cellular_alt</span> ${curr.difficulty || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function openFromLibrary(id) {
+        // Find curriculum in cache
+        const curr = state.libraryCache?.find(c => c.id === id);
+        if (!curr) {
+            alert("Could not load curriculum data.");
+            return;
+        }
+
+        // Hydrate state
+        state.vision = "Loaded from library: " + curr.title; // Fallback vision string since we don't save the raw vision prompt in db setup currently
+        state.curriculumTitle = curr.title;
+        state.curriculumDescription = curr.description;
+        state.curriculumMarkdown = curr.content;
+        state.difficulty = curr.difficulty;
+        state.duration = curr.duration;
+        state.selectedCategory = curr.category;
+        state.visibility = curr.visibility || 'public';
+        
+        // Reset chat and history
+        state.chatMessages = [];
+        state.checkpoints = [];
+        state.previewingCheckpointId = null;
+        
+        // Define base history from which further edits will append
+        const systemPrompt = "You are an expert curriculum designer.";
+        state.conversationHistory = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Please refine this curriculum:\n\n${curr.content}` }
+        ];
+
+        // Add initial checkpoint
+        addCheckpoint('Loaded from Library', curr.content);
+
+        // Add greeting message
+        addChatMessage('ai', `I've opened "${curr.title}" from your library. You can review it in the main panel. Let me know what edits you'd like to make!`);
+
+        // Navigate and render
+        navigateView('workspace');
+        renderCurriculum();
     }
 
     // ---- INIT ----
