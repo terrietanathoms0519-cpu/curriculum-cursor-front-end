@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Public Sans", sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom colors based on user request: Deep navy/purple and Lavender */
+        .bg-custom-navy { background-color: #1e0f24; }
+        .bg-custom-lavender { background-color: #40204b; }
+        .text-custom-lavender-light { color: #bd8dce; }
+        .border-custom-lavender { border-color: #5b2e6b; }
+        .bg-custom-gold { background-color: #e6a1ff; } /* Using the accent color from the reference */
+        .text-custom-gold { color: #e6a1ff; }
+    </style>
+</head>
+<body class="bg-custom-navy text-slate-100 min-h-screen font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-custom-lavender px-10 py-4 bg-custom-navy/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-4 text-white">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Curricula</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-9">
+<a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">My Library</a>
+<a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Templates</a>
+<a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">New Project</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-custom-lavender" data-alt="Professional educator profile photo portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBDa63U1-E8zzmPVeFWjkxV3irk-K6Oyg2pXsNb1ytnu7wHrjC94kUSYAcOuoXRRu9YTel5Bgfv3tkxRrC_qHLBwTfRGGgqREHqHlcI6eapu_I2TzOMJm7TSS1AYed19SheY-sFeBcvv4o21YVt8tgdymlKu-5m4OqaQqlo3nP6OrVSwiU1v7CVy-6KOgGPRz-W_9WOe8wgDC_sI3-izxX7V82usSVUi5hCy3EOV5BBDgjPPCKn5JpBAxXHrz64UEdm6l086PxhENps");'></div>
+</div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-12 px-6">
+<div class="layout-content-container flex flex-col max-w-[840px] flex-1 space-y-8">
+<!-- Hero Section -->
+<div class="flex flex-col gap-4 text-center items-center">
+<div class="inline-flex items-center justify-center p-3 rounded-full bg-primary/20 text-primary mb-2">
+<span class="material-symbols-outlined text-3xl">school</span>
+</div>
+<h1 class="text-white text-5xl font-black leading-tight tracking-tight">Create New Curriculum</h1>
+<p class="text-custom-lavender-light text-lg max-w-2xl font-normal leading-relaxed">
+                            Transform your educational vision into a structured, comprehensive learning path using our advanced pedagogical AI.
+                        </p>
+</div>
+<!-- Category Quick Select -->
+<div class="flex flex-col items-center gap-4">
+<p class="text-slate-400 text-sm font-semibold uppercase tracking-widest">Select Academic Area</p>
+<div class="flex gap-3 flex-wrap justify-center">
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-custom-lavender border border-custom-lavender hover:border-primary px-6 transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">science</span>
+<span class="text-white text-sm font-medium">STEM</span>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-custom-lavender border border-custom-lavender hover:border-primary px-6 transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">menu_book</span>
+<span class="text-white text-sm font-medium">Humanities</span>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-custom-lavender border border-custom-lavender hover:border-primary px-6 transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">child_care</span>
+<span class="text-white text-sm font-medium">K-12</span>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-custom-lavender border border-custom-lavender hover:border-primary px-6 transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">business_center</span>
+<span class="text-white text-sm font-medium">Professional</span>
+</button>
+</div>
+</div>
+<!-- Input Area -->
+<div class="bg-custom-lavender/40 p-8 rounded-3xl border border-custom-lavender shadow-2xl">
+<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-white text-lg font-semibold flex items-center gap-2" for="vision">
+<span class="material-symbols-outlined text-primary">psychology</span>
+                                    Curriculum Vision
+                                </label>
+<p class="text-custom-lavender-light text-sm">Be specific about learning outcomes, target age, and duration.</p>
+<textarea class="form-input mt-2 flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-2xl text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-custom-lavender bg-[#2d1736] placeholder:text-slate-500 min-h-48 p-5 text-base font-normal leading-relaxed" id="vision" placeholder="Describe your vision, learning objectives, and target audience here... For example: 'An 8-week introductory course on sustainable urban gardening for middle schoolers, focusing on biology and environmental science.'"></textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-white text-sm font-semibold">Difficulty Level</label>
+<select class="form-select w-full bg-[#2d1736] border-custom-lavender rounded-xl text-white focus:ring-primary">
+<option>Beginner</option>
+<option>Intermediate</option>
+<option>Advanced</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-white text-sm font-semibold">Course Duration</label>
+<select class="form-select w-full bg-[#2d1736] border-custom-lavender rounded-xl text-white focus:ring-primary">
+<option>4 Weeks</option>
+<option>8 Weeks</option>
+<option>Full Semester</option>
+</select>
+</div>
+</div>
+<div class="flex pt-4 justify-center">
+<button class="flex min-w-[280px] cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 px-8 bg-primary text-white gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform text-lg font-black leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="truncate">Generate Curriculum</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Info -->
+<div class="flex justify-center gap-12 text-slate-500 text-sm py-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base">verified_user</span>
+                            Academic Standards Compliant
+                        </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base">bolt</span>
+                            AI-Powered Insights
+                        </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base">cloud_done</span>
+                            Auto-saves to Library
+                        </div>
+</div>
+</div>
+</main>
+<!-- Decorative Elements -->
+<div class="fixed top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-[100px] -z-10"></div>
+<div class="fixed bottom-20 right-10 w-80 h-80 bg-custom-gold/10 rounded-full blur-[120px] -z-10"></div>
+</div>
+</div>
+</body></html>

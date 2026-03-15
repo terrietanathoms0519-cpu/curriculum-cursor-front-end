@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                        "navy-custom": "#1e0f24",
+                        "lavender-custom": "#bd8dce",
+                        "gold-custom": "#ffd700",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Publishing Confirmation | Curricula</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-navy-custom dark:bg-background-dark overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Navigation Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-700/50 px-10 py-3 bg-navy-custom/50 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-4 text-white">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg">
+<span class="material-symbols-outlined text-white">auto_stories</span>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-tight">Curricula</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-white/80 hover:text-white text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-white/80 hover:text-white text-sm font-medium transition-colors" href="#">My Library</a>
+<a class="text-white/80 hover:text-white text-sm font-medium transition-colors" href="#">Drafts</a>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-primary/30" data-alt="User profile avatar portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlIh7sCDwkokC4A21seu2TpoczfNHXSNU__01HT5FsgcsAsnZgwQkdbrJe_pNu6FQnc_wN_pCmHFSET7cN6XlbivLxYcyuz-qMIy8iWJhm4yEKCoCcS21w10H4XGi299KbuEtpZpl2vPvLro7XAAWbUzVqJMlRc4W76slyu1diEGmYngfJ5LF7PWBR7YrfuununrGWjsjSAMpt9GLQUGp4yppjlbfImO6NXPX9TzMV_ElK5oVCmN4_0W_bJkUz_qGATrT_1MIsMUcI");'></div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center py-12 px-6">
+<div class="w-full max-w-[800px] flex flex-col gap-8">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-lavender-custom text-sm font-medium">
+<a class="hover:underline" href="#">Drafts</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<a class="hover:underline" href="#">Advanced Mathematics</a>
+<span class="material-symbols-outlined text-xs text-white/40">chevron_right</span>
+<span class="text-white">Publishing</span>
+</div>
+<!-- Header Section -->
+<div class="flex flex-col gap-2">
+<h1 class="text-white text-4xl font-black tracking-tight">Review &amp; Publish</h1>
+<p class="text-lavender-custom text-lg">Your curriculum is ready for the world. Review the details below.</p>
+</div>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left: Preview Card -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<h2 class="text-white text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">visibility</span>
+                                Curriculum Preview
+                            </h2>
+<div class="bg-[#2d1736] rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+<div class="w-full aspect-video bg-center bg-cover" data-alt="Abstract physics and mathematical formulas on dark background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAt7UO09UnmT6Jq7lXwHFMihgQAfDfKqIURY-dERreqLp8bdpsOw3Jkdl_-z_x_Vo_VJQ8aHpUbtnsnBNfcE5bP6osdu2aV6Sd9UGu1GZ7DzeqqdRtGC_6rIJX1RXg6pCWAOdQ4E2fHGCI7tH-y18FZM2dCeR6wvJ3_zwEaFfVb_08np9amsbKz-TOQCuoi2Ul1WLSLTosohXIRJ4wzdmVOTa3x9luD6a363SNHK5f4BuHBGULuy9VkawVCJYjYX_ndtmOT-SqACHbP");'>
+</div>
+<div class="p-6 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<h3 class="text-white text-2xl font-bold">Advanced Quantum Mechanics</h3>
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Draft</span>
+</div>
+<div class="flex items-center gap-4 text-lavender-custom">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">auto_awesome_motion</span>
+<span class="text-sm font-medium">12 Modules</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="text-sm font-medium">45 Hours</span>
+</div>
+</div>
+<p class="text-lavender-custom/80 text-base leading-relaxed">
+                                        A comprehensive guide to non-relativistic quantum theory, including Schrödinger's equation, orbital angular momentum, and applications in modern physics.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Right: Settings & Actions -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<h2 class="text-white text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">settings</span>
+                                Visibility Settings
+                            </h2>
+<div class="bg-[#2d1736] rounded-xl p-6 border border-white/10 flex flex-col gap-6">
+<!-- Visibility Options -->
+<div class="flex flex-col gap-4">
+<label class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors group">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">public</span>
+</div>
+<div>
+<p class="text-white font-semibold">Public</p>
+<p class="text-lavender-custom text-xs">Visible to everyone in the library</p>
+</div>
+</div>
+<input checked="" class="form-radio text-primary focus:ring-primary h-5 w-5 bg-navy-custom border-white/20" name="visibility" type="radio" value="public"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors group">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-700/50 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<div>
+<p class="text-white font-semibold">Private</p>
+<p class="text-lavender-custom text-xs">Only you can see this curriculum</p>
+</div>
+</div>
+<input class="form-radio text-primary focus:ring-primary h-5 w-5 bg-navy-custom border-white/20" name="visibility" type="radio" value="private"/>
+</label>
+</div>
+<div class="h-px bg-white/10 w-full"></div>
+<!-- Summary -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between text-sm">
+<span class="text-lavender-custom">Status</span>
+<span class="text-white font-medium">Ready to Publish</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-lavender-custom">Licensing</span>
+<span class="text-white font-medium">Standard Academic</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-3 pt-2">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">rocket_launch</span>
+                                        Confirm &amp; Publish
+                                    </button>
+<button class="w-full bg-white/5 hover:bg-white/10 text-white font-semibold py-3 rounded-lg border border-white/10 transition-all">
+                                        Save as Draft
+                                    </button>
+</div>
+</div>
+<!-- Help Text -->
+<div class="p-4 rounded-lg bg-gold-custom/10 border border-gold-custom/20 flex gap-3">
+<span class="material-symbols-outlined text-gold-custom">info</span>
+<p class="text-gold-custom text-xs leading-relaxed">
+                                    By publishing, you agree to Curricula's Terms of Service and Content Guidelines. You can change visibility settings at any time from your library.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-auto px-10 py-6 border-t border-white/5 flex justify-between items-center text-lavender-custom/60 text-xs">
+<p>© 2024 Curricula Learning Systems</p>
+<div class="flex gap-6">
+<a class="hover:text-lavender-custom transition-colors" href="#">Help Center</a>
+<a class="hover:text-lavender-custom transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-lavender-custom transition-colors" href="#">Privacy Policy</a>
+</div>
+</footer>
+</div>
+</div>
+</body></html>
