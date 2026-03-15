@@ -11,6 +11,8 @@
     <!-- Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/diff@5.2.0/dist/diff.min.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Config with API keys (optional, for local dev only — gitignored) -->
     <script src="config.js" onerror="window.CONFIG={}"></script>
     <script>
@@ -720,6 +722,17 @@
         previewingCheckpointId: null
     };
 
+    // ---- SUPABASE INIT ----
+    let supabaseClient = null;
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY) {
+            supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized.');
+        } else {
+            console.warn('⚠️ Supabase config is missing. Data will only be saved locally.');
+        }
+    });
+
     // ---- NAVIGATION ----
     function navigateView(viewName) {
         document.querySelectorAll('.view').forEach(v => {
@@ -1178,6 +1191,33 @@ Please generate a detailed, structured curriculum.`;
             created_at: new Date().toISOString()
         };
 
+        // Save to Supabase if configured 
+        if (supabaseClient) {
+            const btn = document.querySelector('button[onclick="handleConfirmPublish()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-lg mr-2">progress_activity</span>Publishing...`;
+            btn.disabled = true;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('curricula')
+                    .insert([curriculumData]);
+                
+                if (error) {
+                    console.error('Error saving to Supabase:', error);
+                    alert('Failed to save to cloud storage. Error: ' + error.message);
+                } else {
+                    console.log('Successfully saved to Supabase');
+                }
+            } catch (err) {
+                 console.error('Exception when saving to Supabase:', err);
+                 alert('Network error when attempting to save to cloud storage.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
         // Save to localStorage as fallback
         localStorage.setItem('published_curriculum', JSON.stringify(curriculumData));
 
@@ -1259,10 +1299,45 @@ Please generate a detailed, structured curriculum.`;
     }
 
     // ---- INIT ----
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         // Check for config
         if (typeof CONFIG === 'undefined') {
             console.warn('⚠️ config.js not found. Please create config.js from config.example.js');
+        }
+
+        // Try to load latest curriculum from Supabase
+        if (supabaseClient) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('curricula')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (data && !error) {
+                    console.log('Loaded latest curriculum from Supabase');
+                    // We could auto-navigate to workspace/published here, but for now 
+                    // we'll just populate the published view data in case they navigate there.
+                    state.curriculumTitle = data.title;
+                    state.curriculumDescription = data.description;
+                    state.curriculumMarkdown = data.content;
+                    state.difficulty = data.difficulty;
+                    state.duration = data.duration;
+                    state.selectedCategory = data.category;
+                    state.visibility = data.visibility;
+
+                    // If we want to restore to the published view immediately on load:
+                    // document.getElementById('published-title').textContent = data.title;
+                    // document.getElementById('published-description').textContent = data.description;
+                    // document.getElementById('published-breadcrumb').textContent = data.title;
+                    // document.getElementById('published-date').textContent = new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    // document.getElementById('published-visibility').textContent = data.visibility.charAt(0).toUpperCase() + data.visibility.slice(1);
+                    // document.getElementById('published-content').innerHTML = marked.parse(data.content);
+                }
+            } catch (err) {
+                console.error('Error fetching initial data from Supabase:', err);
+            }
         }
     });
 </script>
