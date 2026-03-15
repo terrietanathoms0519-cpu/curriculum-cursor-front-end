@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Curricula — AI-Powered Curriculum Builder</title>
+    <meta name="description" content="Create, refine, and publish professional curricula with AI assistance. Generate, iterate, and share your educational content."/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Config with API keys (gitignored) -->
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                        "navy": "#1e0f24",
+                        "purple-deep": "#40204b",
+                        "purple-card": "#2d1736",
+                        "lavender": "#bd8dce",
+                        "lavender-border": "#5b2e6b",
+                        "accent-gold": "#d4af37",
+                        "brand-purple": "#4b2038",
+                        "brand-lavender": "#f3e8ff",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill-1 { font-variation-settings: 'FILL' 1; }
+
+        /* View transitions */
+        .view { display: none; opacity: 0; transition: opacity 0.4s ease; }
+        .view.active { display: flex; opacity: 1; }
+        .view.fade-in { animation: fadeSlideIn 0.5s ease forwards; }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loading pulse */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(236, 91, 19, 0.4); }
+            50% { box-shadow: 0 0 20px 8px rgba(236, 91, 19, 0.15); }
+        }
+        .pulse-glow { animation: pulse-glow 2s infinite; }
+
+        /* Typing indicator */
+        .typing-dot { animation: typingBounce 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+
+        /* Chip selection */
+        .chip-btn.selected { border-color: #ec5b13 !important; background-color: rgba(236, 91, 19, 0.15) !important; }
+
+        /* Curriculum content rendering */
+        .curriculum-content h1 { font-size: 1.5rem; font-weight: 800; color: #4b2038; margin-bottom: 0.5rem; }
+        .curriculum-content h2 { font-size: 1.25rem; font-weight: 700; color: #4b2038; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .curriculum-content h3 { font-size: 1.1rem; font-weight: 600; color: #ec5b13; margin-top: 1rem; margin-bottom: 0.25rem; }
+        .curriculum-content p { color: #475569; line-height: 1.75; margin-bottom: 0.75rem; }
+        .curriculum-content ul, .curriculum-content ol { color: #475569; margin-left: 1.5rem; margin-bottom: 0.75rem; }
+        .curriculum-content li { margin-bottom: 0.25rem; line-height: 1.6; }
+        .curriculum-content ul { list-style-type: disc; }
+        .curriculum-content ol { list-style-type: decimal; }
+        .curriculum-content strong { color: #1e293b; }
+        .curriculum-content blockquote { border-left: 4px solid #ec5b13; padding-left: 1rem; margin: 1rem 0; color: #64748b; font-style: italic; }
+        .curriculum-content hr { border-color: #e2e8f0; margin: 1.5rem 0; }
+        .curriculum-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .curriculum-content th, .curriculum-content td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+        .curriculum-content th { background-color: #f8fafc; font-weight: 600; }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #5b2e6b; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c3e8f; }
+
+        /* Chat smooth scroll */
+        .chat-container { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-navy text-slate-100 min-h-screen font-display">
+
+<!-- ============================================================ -->
+<!-- VIEW 1: GENERATE CURRICULUM                                   -->
+<!-- ============================================================ -->
+<div id="view-generate" class="view active fade-in flex-col min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <!-- Nav -->
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-lavender-border px-10 py-4 bg-navy/80 backdrop-blur-md sticky top-0 z-50">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+                        <span class="material-symbols-outlined">auto_stories</span>
+                    </div>
+                    <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Curricula</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8">
+                    <nav class="flex items-center gap-9">
+                        <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Dashboard</a>
+                        <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">My Library</a>
+                        <a class="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#">Templates</a>
+                    </nav>
+                    <div class="flex items-center gap-4">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-lavender-border bg-purple-deep flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lavender">person</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex flex-1 justify-center py-12 px-6">
+                <div class="layout-content-container flex flex-col max-w-[840px] flex-1 space-y-8">
+                    <!-- Hero -->
+                    <div class="flex flex-col gap-4 text-center items-center">
+                        <div class="inline-flex items-center justify-center p-3 rounded-full bg-primary/20 text-primary mb-2">
+                            <span class="material-symbols-outlined text-3xl">school</span>
+                        </div>
+                        <h1 id="generate-heading" class="text-white text-5xl font-black leading-tight tracking-tight">Create New Curriculum</h1>
+                        <p class="text-lavender text-lg max-w-2xl font-normal leading-relaxed">
+                            Transform your educational vision into a structured, comprehensive learning path using our advanced pedagogical AI.
+                        </p>
+                    </div>
+
+                    <!-- Category Chips -->
+                    <div class="flex flex-col items-center gap-4">
+                        <p class="text-slate-400 text-sm font-semibold uppercase tracking-widest">Select Academic Area</p>
+                        <div class="flex gap-3 flex-wrap justify-center" id="category-chips">
+                            <button onclick="toggleChip(this)" class="chip-btn flex h-10 items-center justify-center gap-x-2 rounded-xl bg-purple-deep border border-lavender-border hover:border-primary px-6 transition-all">
+                                <span class="material-symbols-outlined text-sm text-primary">science</span>
+                                <span class="text-white text-sm font-medium">STEM</span>
+                            </button>
+                            <button onclick="toggleChip(this)" class="chip-btn flex h-10 items-center justify-center gap-x-2 rounded-xl bg-purple-deep border border-lavender-border hover:border-primary px-6 transition-all">
+                                <span class="material-symbols-outlined text-sm text-primary">menu_book</span>
+                                <span class="text-white text-sm font-medium">Humanities</span>
+                            </button>
+                            <button onclick="toggleChip(this)" class="chip-btn flex h-10 items-center justify-center gap-x-2 rounded-xl bg-purple-deep border border-lavender-border hover:border-primary px-6 transition-all">
+                                <span class="material-symbols-outlined text-sm text-primary">child_care</span>
+                                <span class="text-white text-sm font-medium">K-12</span>
+                            </button>
+                            <button onclick="toggleChip(this)" class="chip-btn flex h-10 items-center justify-center gap-x-2 rounded-xl bg-purple-deep border border-lavender-border hover:border-primary px-6 transition-all">
+                                <span class="material-symbols-outlined text-sm text-primary">business_center</span>
+                                <span class="text-white text-sm font-medium">Professional</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="bg-purple-deep/40 p-8 rounded-3xl border border-lavender-border shadow-2xl">
+                        <div class="flex flex-col gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-white text-lg font-semibold flex items-center gap-2" for="vision">
+                                    <span class="material-symbols-outlined text-primary">psychology</span>
+                                    Curriculum Vision
+                                </label>
+                                <p class="text-lavender text-sm">Be specific about learning outcomes, target age, and duration.</p>
+                                <textarea class="form-input mt-2 flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-2xl text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-lavender-border bg-purple-card placeholder:text-slate-500 min-h-48 p-5 text-base font-normal leading-relaxed" id="vision" placeholder="Describe your vision, learning objectives, and target audience here... For example: 'An 8-week introductory course on sustainable urban gardening for middle schoolers, focusing on biology and environmental science.'"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-white text-sm font-semibold">Difficulty Level</label>
+                                    <select id="difficulty" class="form-select w-full bg-purple-card border-lavender-border rounded-xl text-white focus:ring-primary">
+                                        <option>Beginner</option>
+                                        <option>Intermediate</option>
+                                        <option>Advanced</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-white text-sm font-semibold">Course Duration</label>
+                                    <select id="duration" class="form-select w-full bg-purple-card border-lavender-border rounded-xl text-white focus:ring-primary">
+                                        <option>4 Weeks</option>
+                                        <option>8 Weeks</option>
+                                        <option>Full Semester</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex pt-4 justify-center">
+                                <button id="btn-generate" onclick="handleGenerate()" class="flex min-w-[280px] cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 px-8 bg-primary text-white gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform text-lg font-black leading-normal tracking-[0.015em]">
+                                    <span class="material-symbols-outlined">auto_awesome</span>
+                                    <span class="truncate">Generate Curriculum</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="flex justify-center gap-12 text-slate-500 text-sm py-6">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">verified_user</span>
+                            Academic Standards Compliant
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">bolt</span>
+                            AI-Powered Insights
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">cloud_done</span>
+                            Auto-saves to Library
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <!-- Decorative blurs -->
+        <div class="fixed top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        <div class="fixed bottom-20 right-10 w-80 h-80 bg-lavender/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW 2: CURRICULUM WORKSPACE                                  -->
+<!-- ============================================================ -->
+<div id="view-workspace" class="view flex-col h-screen">
+    <div class="flex h-screen w-full">
+        <!-- Side Navigation -->
+        <aside class="w-64 flex-shrink-0 bg-brand-purple flex flex-col border-r border-slate-800">
+            <div class="p-6 flex items-center gap-3">
+                <div class="bg-primary/20 p-2 rounded-xl">
+                    <span class="material-symbols-outlined text-primary">school</span>
+                </div>
+                <div>
+                    <h1 class="text-white text-sm font-bold leading-tight">Curriculum Workspace</h1>
+                    <p class="text-lavender text-xs" id="sidebar-category">AI Generated</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 py-2 space-y-1">
+                <a class="flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer" onclick="navigateView('generate')">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                    <span class="text-sm font-medium">Back to Create</span>
+                </a>
+                <div class="pt-4 pb-2 px-3">
+                    <p class="text-lavender/60 text-[10px] uppercase font-bold tracking-wider">Sections</p>
+                </div>
+                <div id="sidebar-sections">
+                    <!-- Dynamically populated -->
+                </div>
+            </nav>
+            <div class="p-4 border-t border-white/10">
+                <button onclick="handlePublishClick()" class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all">
+                    <span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+                    Publish Curriculum
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 bg-background-light">
+            <!-- Header -->
+            <header class="h-16 flex items-center justify-between px-8 border-b border-slate-200 bg-white">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 text-sm" id="workspace-breadcrumb-parent">Curriculum</span>
+                    <span class="text-slate-300">/</span>
+                    <span class="font-semibold text-slate-800" id="workspace-breadcrumb-title">Generated Content</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="handleRegenerate()" class="flex items-center gap-2 text-primary font-bold hover:bg-primary/10 px-4 py-2 rounded-xl transition-colors">
+                        <span class="material-symbols-outlined">refresh</span>
+                        Regenerate
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Scroll Area -->
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-end justify-between mb-8">
+                        <div>
+                            <h2 class="text-4xl font-black text-slate-900 tracking-tight" id="curriculum-title">Your Curriculum</h2>
+                            <p class="text-slate-500 mt-2 text-lg" id="curriculum-subtitle">AI-generated curriculum based on your vision.</p>
+                        </div>
+                    </div>
+
+                    <!-- Curriculum Content Panel -->
+                    <div id="curriculum-content" class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 curriculum-content">
+                        <div class="flex items-center justify-center py-16 text-slate-400">
+                            <span class="material-symbols-outlined text-4xl mr-3 animate-spin">progress_activity</span>
+                            Generating your curriculum...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- AI Assistant Sidebar -->
+        <aside class="w-80 flex-shrink-0 bg-white border-l border-slate-200 flex flex-col">
+            <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                    <h3 class="font-bold text-slate-900">AI Assistant</h3>
+                </div>
+                <span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase">Active</span>
+            </div>
+            <div id="chat-container" class="chat-container flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Chat messages rendered here -->
+            </div>
+            <!-- Prompt Input -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50">
+                <div class="bg-white rounded-xl border border-slate-200 p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent transition-all">
+                    <textarea id="edit-prompt" class="w-full bg-transparent border-none text-sm resize-none focus:ring-0 text-slate-700 min-h-[80px]" placeholder="E.g., Add more hands-on activities, expand Section 2, add assessment rubrics..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();handleEditPrompt()}"></textarea>
+                    <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                        <div class="flex gap-2">
+                            <button class="p-1.5 text-slate-400 hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">attach_file</span>
+                            </button>
+                        </div>
+                        <button onclick="handleEditPrompt()" class="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-all active:scale-95">
+                            Submit Edit
+                            <span class="material-symbols-outlined text-[16px]">send</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-3 text-center">Press Enter to submit • Shift+Enter for new line</p>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW 3: PUBLISHING CONFIRMATION                               -->
+<!-- ============================================================ -->
+<div id="view-publish" class="view flex-col min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col bg-navy overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <!-- Nav -->
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-700/50 px-10 py-3 bg-navy/50 backdrop-blur-md sticky top-0 z-50">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="size-8 flex items-center justify-center bg-primary rounded-lg">
+                        <span class="material-symbols-outlined text-white">auto_stories</span>
+                    </div>
+                    <h2 class="text-white text-lg font-bold leading-tight tracking-tight">Curricula</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8">
+                    <div class="flex items-center gap-9">
+                        <a class="text-white/80 hover:text-white text-sm font-medium transition-colors cursor-pointer" onclick="navigateView('workspace')">Back to Workspace</a>
+                        <a class="text-white/80 hover:text-white text-sm font-medium transition-colors" href="#">My Library</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col items-center py-12 px-6">
+                <div class="w-full max-w-[800px] flex flex-col gap-8">
+                    <!-- Breadcrumbs -->
+                    <div class="flex items-center gap-2 text-lavender text-sm font-medium">
+                        <a class="hover:underline cursor-pointer" onclick="navigateView('workspace')">Workspace</a>
+                        <span class="material-symbols-outlined text-xs">chevron_right</span>
+                        <span class="text-white">Publishing</span>
+                    </div>
+
+                    <!-- Header -->
+                    <div class="flex flex-col gap-2">
+                        <h1 class="text-white text-4xl font-black tracking-tight">Review & Publish</h1>
+                        <p class="text-lavender text-lg">Your curriculum is ready for the world. Review the details below.</p>
+                    </div>
+
+                    <!-- Content Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <!-- Left: Preview -->
+                        <div class="lg:col-span-7 flex flex-col gap-6">
+                            <h2 class="text-white text-xl font-bold flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">visibility</span>
+                                Curriculum Preview
+                            </h2>
+                            <div class="bg-purple-card rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                                <div class="w-full h-48 bg-gradient-to-br from-primary/30 via-purple-deep to-navy flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-6xl text-white/30">school</span>
+                                </div>
+                                <div class="p-6 flex flex-col gap-3">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-white text-2xl font-bold" id="publish-preview-title">Curriculum Title</h3>
+                                        <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Draft</span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-lavender">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-sm">schedule</span>
+                                            <span class="text-sm font-medium" id="publish-preview-duration">8 Weeks</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-sm">signal_cellular_alt</span>
+                                            <span class="text-sm font-medium" id="publish-preview-difficulty">Intermediate</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-lavender/80 text-base leading-relaxed" id="publish-preview-desc">
+                                        A comprehensive curriculum generated by AI.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Settings -->
+                        <div class="lg:col-span-5 flex flex-col gap-6">
+                            <h2 class="text-white text-xl font-bold flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">settings</span>
+                                Visibility Settings
+                            </h2>
+                            <div class="bg-purple-card rounded-xl p-6 border border-white/10 flex flex-col gap-6">
+                                <div class="flex flex-col gap-4">
+                                    <label class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+                                        <div class="flex items-center gap-3">
+                                            <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                <span class="material-symbols-outlined">public</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-white font-semibold">Public</p>
+                                                <p class="text-lavender text-xs">Visible to everyone in the library</p>
+                                            </div>
+                                        </div>
+                                        <input checked name="visibility" type="radio" value="public" class="form-radio text-primary focus:ring-primary h-5 w-5 bg-navy border-white/20"/>
+                                    </label>
+                                    <label class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+                                        <div class="flex items-center gap-3">
+                                            <div class="size-10 rounded-full bg-slate-700/50 flex items-center justify-center text-slate-400">
+                                                <span class="material-symbols-outlined">lock</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-white font-semibold">Private</p>
+                                                <p class="text-lavender text-xs">Only you can see this curriculum</p>
+                                            </div>
+                                        </div>
+                                        <input name="visibility" type="radio" value="private" class="form-radio text-primary focus:ring-primary h-5 w-5 bg-navy border-white/20"/>
+                                    </label>
+                                </div>
+                                <div class="h-px bg-white/10 w-full"></div>
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-lavender">Status</span>
+                                        <span class="text-white font-medium">Ready to Publish</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-lavender">Licensing</span>
+                                        <span class="text-white font-medium">Standard Academic</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-3 pt-2">
+                                    <button onclick="handleConfirmPublish()" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined">rocket_launch</span>
+                                        Confirm & Publish
+                                    </button>
+                                    <button onclick="navigateView('workspace')" class="w-full bg-white/5 hover:bg-white/10 text-white font-semibold py-3 rounded-lg border border-white/10 transition-all">
+                                        Save as Draft
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Help -->
+                            <div class="p-4 rounded-lg bg-accent-gold/10 border border-accent-gold/20 flex gap-3">
+                                <span class="material-symbols-outlined text-accent-gold">info</span>
+                                <p class="text-accent-gold text-xs leading-relaxed">
+                                    By publishing, you agree to Curricula's Terms of Service. You can change visibility at any time from your library.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="mt-auto px-10 py-6 border-t border-white/5 flex justify-between items-center text-lavender/60 text-xs">
+                <p>&copy; 2026 Curricula Learning Systems</p>
+                <div class="flex gap-6">
+                    <a class="hover:text-lavender transition-colors" href="#">Help Center</a>
+                    <a class="hover:text-lavender transition-colors" href="#">Terms of Service</a>
+                    <a class="hover:text-lavender transition-colors" href="#">Privacy Policy</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW 4: PUBLISHED CURRICULUM                                  -->
+<!-- ============================================================ -->
+<div id="view-published" class="view flex-col min-h-screen">
+    <div class="bg-background-light text-slate-900 min-h-screen">
+        <!-- Nav -->
+        <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 lg:px-20 py-3">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-2 text-brand-purple">
+                        <span class="material-symbols-outlined text-3xl font-bold">school</span>
+                        <h2 class="text-xl font-bold tracking-tight">CurriculumHub</h2>
+                    </div>
+                    <div class="hidden md:flex items-center gap-6">
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Library</a>
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">My Courses</a>
+                        <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Community</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="handleCreateNew()" class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all">
+                        Create New
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-6 lg:px-20 py-8">
+            <!-- Breadcrumbs -->
+            <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+                <a class="hover:text-primary" href="#">Dashboard</a>
+                <span class="material-symbols-outlined text-xs">chevron_right</span>
+                <a class="hover:text-primary" href="#">Published Curricula</a>
+                <span class="material-symbols-outlined text-xs">chevron_right</span>
+                <span class="text-slate-900 font-medium" id="published-breadcrumb">Curriculum</span>
+            </nav>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <!-- Main Content -->
+                <div class="lg:col-span-8">
+                    <section class="mb-10">
+                        <h1 class="text-4xl lg:text-5xl font-black text-slate-900 leading-tight mb-4" id="published-title">
+                            Published Curriculum
+                        </h1>
+                        <p class="text-xl text-slate-600 leading-relaxed mb-8" id="published-description">
+                            A comprehensive curriculum created with AI assistance.
+                        </p>
+
+                        <!-- Learning Objectives -->
+                        <div class="bg-brand-lavender p-6 rounded-xl border-l-4 border-brand-purple mb-10" id="published-objectives">
+                            <h3 class="text-brand-purple font-bold text-lg mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                                Learning Objectives
+                            </h3>
+                            <p class="text-slate-700">Generated from curriculum content.</p>
+                        </div>
+
+                        <!-- Content -->
+                        <div id="published-content" class="curriculum-content prose max-w-none">
+                            <!-- Rendered markdown content -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="lg:col-span-4 space-y-6">
+                    <!-- Author -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="h-16 w-16 rounded-full bg-brand-purple flex items-center justify-center text-white overflow-hidden border-2 border-primary">
+                                <span class="material-symbols-outlined text-3xl">person</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-slate-900">Teacher</h4>
+                                <p class="text-sm text-slate-500 leading-tight">Curriculum Designer</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500">Published</span>
+                                <span class="text-slate-900 font-medium" id="published-date">Just Now</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500">Visibility</span>
+                                <span class="text-slate-900 font-medium" id="published-visibility">Public</span>
+                            </div>
+                        </div>
+                        <button onclick="handleForkRemix()" class="w-full bg-brand-purple text-white hover:bg-brand-purple/90 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-purple/20">
+                            <span class="material-symbols-outlined text-sm">fork_right</span>
+                            Fork / Remix Curriculum
+                        </button>
+                    </div>
+
+                    <!-- Share -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <h5 class="font-bold text-slate-900 mb-4">Share this curriculum</h5>
+                        <div class="flex gap-3 mb-6">
+                            <button onclick="handleShare('share')" class="flex-1 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-primary/10 hover:text-primary transition-all">
+                                <span class="material-symbols-outlined">share</span>
+                            </button>
+                            <button onclick="handleShare('link')" class="flex-1 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-primary/10 hover:text-primary transition-all">
+                                <span class="material-symbols-outlined">link</span>
+                            </button>
+                            <button onclick="handleShare('bookmark')" class="flex-1 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-primary/10 hover:text-primary transition-all">
+                                <span class="material-symbols-outlined">bookmark</span>
+                            </button>
+                        </div>
+                        <div class="p-4 bg-accent-gold/5 rounded-xl border border-accent-gold/20">
+                            <div class="flex items-center gap-2 text-accent-gold mb-1">
+                                <span class="material-symbols-outlined text-sm">verified</span>
+                                <span class="text-xs font-bold uppercase tracking-wider">AI Generated</span>
+                            </div>
+                            <p class="text-xs text-slate-600">This curriculum was created using AI-powered tools and reviewed by the publishing teacher.</p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 mt-20 py-12">
+            <div class="max-w-7xl mx-auto px-6 lg:px-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center gap-2 text-brand-purple mb-4">
+                        <span class="material-symbols-outlined text-2xl font-bold">school</span>
+                        <h2 class="text-xl font-bold tracking-tight">CurriculumHub</h2>
+                    </div>
+                    <p class="text-slate-500 max-w-sm">Empowering educators through collaborative, AI-powered curriculum design and management.</p>
+                </div>
+                <div>
+                    <h5 class="font-bold mb-4">Resources</h5>
+                    <ul class="space-y-2 text-sm text-slate-500">
+                        <li><a class="hover:text-primary" href="#">Documentation</a></li>
+                        <li><a class="hover:text-primary" href="#">Community</a></li>
+                        <li><a class="hover:text-primary" href="#">Templates</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold mb-4">Legal</h5>
+                    <ul class="space-y-2 text-sm text-slate-500">
+                        <li><a class="hover:text-primary" href="#">Terms of Service</a></li>
+                        <li><a class="hover:text-primary" href="#">Privacy Policy</a></li>
+                        <li><a class="hover:text-primary" href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT                                                    -->
+<!-- ============================================================ -->
+<script>
+    // ---- STATE ----
+    const state = {
+        currentView: 'generate',
+        selectedCategory: '',
+        curriculumMarkdown: '',
+        curriculumTitle: '',
+        curriculumDescription: '',
+        chatMessages: [],
+        conversationHistory: [],
+        vision: '',
+        difficulty: 'Beginner',
+        duration: '4 Weeks',
+        visibility: 'public'
+    };
+
+    // ---- NAVIGATION ----
+    function navigateView(viewName) {
+        document.querySelectorAll('.view').forEach(v => {
+            v.classList.remove('active', 'fade-in');
+        });
+        const target = document.getElementById('view-' + viewName);
+        if (target) {
+            // Small delay for transition effect
+            setTimeout(() => {
+                target.classList.add('active', 'fade-in');
+            }, 50);
+        }
+        state.currentView = viewName;
+    }
+
+    // ---- CHIP TOGGLE ----
+    function toggleChip(btn) {
+        document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('selected'));
+        btn.classList.add('selected');
+        state.selectedCategory = btn.querySelector('span:last-child').textContent;
+    }
+
+    // ---- OPENAI API ----
+    async function callOpenAI(messages) {
+        if (!CONFIG || !CONFIG.OPENAI_API_KEY) {
+            throw new Error('OpenAI API key not configured. Please set up config.js');
+        }
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: messages,
+                temperature: 0.7,
+                max_tokens: 4000
+            })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `OpenAI API error: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.choices[0].message.content;
+    }
+
+    // ---- GENERATE CURRICULUM ----
+    async function handleGenerate() {
+        const vision = document.getElementById('vision').value.trim();
+        if (!vision) {
+            document.getElementById('vision').focus();
+            document.getElementById('vision').classList.add('ring-2', 'ring-red-500');
+            setTimeout(() => document.getElementById('vision').classList.remove('ring-2', 'ring-red-500'), 2000);
+            return;
+        }
+
+        state.vision = vision;
+        state.difficulty = document.getElementById('difficulty').value;
+        state.duration = document.getElementById('duration').value;
+
+        // Switch to workspace with loading state
+        navigateView('workspace');
+        document.getElementById('curriculum-content').innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 text-slate-400 gap-4">
+                <div class="relative">
+                    <span class="material-symbols-outlined text-5xl text-primary animate-spin">progress_activity</span>
+                </div>
+                <p class="text-lg font-medium">Generating your curriculum...</p>
+                <p class="text-sm">Our AI is crafting a comprehensive learning plan based on your vision.</p>
+            </div>`;
+
+        const systemPrompt = `You are an expert curriculum designer. Generate a detailed, well-structured curriculum in Markdown format. Include:
+- A clear title (as # heading)
+- A brief description
+- Learning Objectives (bulleted list)
+- Multiple sections/units with:
+  - Section headings (## heading)
+  - Detailed content descriptions
+  - Key concepts highlighted
+  - Activities and assignments
+  - Assessment criteria
+- A summary/conclusion
+
+Make the curriculum professional, pedagogically sound, and comprehensive. Use proper Markdown formatting with headings, lists, bold text, and blockquotes for important notes.`;
+
+        const userPrompt = `Create a curriculum with these specifications:
+- Vision/Topic: ${vision}
+- Academic Area: ${state.selectedCategory || 'General'}
+- Difficulty Level: ${state.difficulty}
+- Duration: ${state.duration}
+
+Please generate a detailed, structured curriculum.`;
+
+        // Set up conversation history
+        state.conversationHistory = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+        ];
+
+        try {
+            const result = await callOpenAI(state.conversationHistory);
+            state.curriculumMarkdown = result;
+            state.conversationHistory.push({ role: 'assistant', content: result });
+
+            // Extract title from first heading
+            const titleMatch = result.match(/^#\s+(.+)$/m);
+            state.curriculumTitle = titleMatch ? titleMatch[1] : 'Generated Curriculum';
+
+            // Extract description (first paragraph after title)
+            const descMatch = result.match(/^#\s+.+\n+(.+?)(\n\n|\n#)/s);
+            state.curriculumDescription = descMatch ? descMatch[1].replace(/[*_#]/g, '').trim() : vision;
+
+            renderCurriculum();
+            addChatMessage('ai', `I've generated your curriculum: "${state.curriculumTitle}". You can review it in the main panel. Feel free to ask me to modify any section — add activities, adjust difficulty, expand topics, or restructure the content.`);
+        } catch (error) {
+            document.getElementById('curriculum-content').innerHTML = `
+                <div class="flex flex-col items-center justify-center py-16 text-red-500 gap-4">
+                    <span class="material-symbols-outlined text-5xl">error</span>
+                    <p class="text-lg font-medium">Generation Failed</p>
+                    <p class="text-sm text-slate-500">${error.message}</p>
+                    <button onclick="handleGenerate()" class="mt-4 bg-primary text-white px-6 py-2 rounded-xl font-bold hover:bg-primary/90">Try Again</button>
+                </div>`;
+        }
+    }
+
+    // ---- RENDER CURRICULUM ----
+    function renderCurriculum() {
+        const contentEl = document.getElementById('curriculum-content');
+        contentEl.innerHTML = marked.parse(state.curriculumMarkdown);
+
+        document.getElementById('curriculum-title').textContent = state.curriculumTitle;
+        document.getElementById('curriculum-subtitle').textContent = state.curriculumDescription;
+        document.getElementById('workspace-breadcrumb-title').textContent = state.curriculumTitle;
+
+        // Populate sidebar sections from H2 headings
+        const sections = state.curriculumMarkdown.match(/^##\s+(.+)$/gm) || [];
+        const sidebarEl = document.getElementById('sidebar-sections');
+        sidebarEl.innerHTML = sections.map((s, i) => {
+            const title = s.replace(/^##\s+/, '');
+            const shortTitle = title.length > 25 ? title.substring(0, 25) + '...' : title;
+            return `<a class="flex items-center gap-3 px-3 py-2 ${i === 0 ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/10'} rounded-xl transition-colors cursor-pointer text-sm font-medium">
+                <span class="material-symbols-outlined text-[20px]">${['menu_book','science','psychology','quiz','assignment','groups'][i % 6]}</span>
+                ${shortTitle}
+            </a>`;
+        }).join('');
+
+        if (state.selectedCategory) {
+            document.getElementById('sidebar-category').textContent = state.selectedCategory;
+        }
+    }
+
+    // ---- EDIT PROMPT (ITERATIVE) ----
+    async function handleEditPrompt() {
+        const promptEl = document.getElementById('edit-prompt');
+        const promptText = promptEl.value.trim();
+        if (!promptText) return;
+
+        // Add user message to chat
+        addChatMessage('user', promptText);
+        promptEl.value = '';
+
+        // Show typing indicator
+        const typingId = showTypingIndicator();
+
+        // Add to conversation history
+        state.conversationHistory.push({
+            role: 'user',
+            content: `The teacher wants the following change to the curriculum:\n\n"${promptText}"\n\nPlease update the ENTIRE curriculum with this change applied. Return the full updated curriculum in Markdown format.`
+        });
+
+        try {
+            const result = await callOpenAI(state.conversationHistory);
+            state.curriculumMarkdown = result;
+            state.conversationHistory.push({ role: 'assistant', content: result });
+
+            // Re-extract title
+            const titleMatch = result.match(/^#\s+(.+)$/m);
+            if (titleMatch) state.curriculumTitle = titleMatch[1];
+
+            removeTypingIndicator(typingId);
+            renderCurriculum();
+            addChatMessage('ai', `I've updated the curriculum based on your instructions. The changes have been applied to the main panel. Let me know if you'd like further adjustments!`);
+        } catch (error) {
+            removeTypingIndicator(typingId);
+            addChatMessage('ai', `Sorry, I encountered an error: ${error.message}. Please try again.`);
+        }
+    }
+
+    // ---- REGENERATE ----
+    async function handleRegenerate() {
+        document.getElementById('curriculum-content').innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 text-slate-400 gap-4">
+                <span class="material-symbols-outlined text-5xl text-primary animate-spin">progress_activity</span>
+                <p class="text-lg font-medium">Regenerating curriculum...</p>
+            </div>`;
+
+        // Reset conversation to just the system + original user prompt
+        const systemMsg = state.conversationHistory[0];
+        const userMsg = state.conversationHistory[1];
+        state.conversationHistory = [systemMsg, userMsg];
+
+        try {
+            const result = await callOpenAI(state.conversationHistory);
+            state.curriculumMarkdown = result;
+            state.conversationHistory.push({ role: 'assistant', content: result });
+
+            const titleMatch = result.match(/^#\s+(.+)$/m);
+            state.curriculumTitle = titleMatch ? titleMatch[1] : 'Generated Curriculum';
+
+            renderCurriculum();
+            addChatMessage('ai', `I've regenerated the curriculum with a fresh perspective. Review the updated content in the main panel.`);
+        } catch (error) {
+            document.getElementById('curriculum-content').innerHTML = `
+                <div class="text-center py-16 text-red-500">
+                    <span class="material-symbols-outlined text-4xl">error</span>
+                    <p class="mt-2">${error.message}</p>
+                </div>`;
+        }
+    }
+
+    // ---- CHAT SYSTEM ----
+    function addChatMessage(role, text) {
+        state.chatMessages.push({ role, text, time: new Date() });
+        renderChat();
+    }
+
+    function renderChat() {
+        const container = document.getElementById('chat-container');
+        container.innerHTML = state.chatMessages.map(msg => {
+            if (msg.role === 'ai') {
+                return `<div class="flex flex-col gap-2">
+                    <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none mr-8">
+                        <p class="text-sm text-slate-700">${msg.text}</p>
+                    </div>
+                    <span class="text-[10px] text-slate-400 ml-1">AI Assistant • ${formatTime(msg.time)}</span>
+                </div>`;
+            } else {
+                return `<div class="flex flex-col gap-2 items-end">
+                    <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none ml-8">
+                        <p class="text-sm">${msg.text}</p>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mr-1">You • ${formatTime(msg.time)}</span>
+                </div>`;
+            }
+        }).join('');
+
+        // Auto-scroll to bottom
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        const id = 'typing-' + Date.now();
+        const container = document.getElementById('chat-container');
+        const div = document.createElement('div');
+        div.id = id;
+        div.className = 'flex flex-col gap-2';
+        div.innerHTML = `<div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none mr-8 inline-flex gap-1.5 items-center">
+            <span class="typing-dot w-2 h-2 bg-slate-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-2 h-2 bg-slate-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-2 h-2 bg-slate-400 rounded-full inline-block"></span>
+        </div>
+        <span class="text-[10px] text-slate-400 ml-1">AI is thinking...</span>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+        return id;
+    }
+
+    function removeTypingIndicator(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    function formatTime(date) {
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 10) return 'Just now';
+        if (diff < 60) return diff + 's ago';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ---- PUBLISHING ----
+    function handlePublishClick() {
+        // Populate publish preview
+        document.getElementById('publish-preview-title').textContent = state.curriculumTitle;
+        document.getElementById('publish-preview-duration').textContent = state.duration;
+        document.getElementById('publish-preview-difficulty').textContent = state.difficulty;
+        document.getElementById('publish-preview-desc').textContent = state.curriculumDescription;
+        navigateView('publish');
+    }
+
+    async function handleConfirmPublish() {
+        const visibility = document.querySelector('input[name="visibility"]:checked')?.value || 'public';
+        state.visibility = visibility;
+
+        // Try to save to Supabase (gracefully degrade to localStorage)
+        const curriculumData = {
+            id: 'curr_' + Date.now(),
+            title: state.curriculumTitle,
+            description: state.curriculumDescription,
+            content: state.curriculumMarkdown,
+            difficulty: state.difficulty,
+            duration: state.duration,
+            category: state.selectedCategory,
+            visibility: visibility,
+            created_at: new Date().toISOString()
+        };
+
+        // Save to localStorage as fallback
+        localStorage.setItem('published_curriculum', JSON.stringify(curriculumData));
+
+        // Populate published view
+        document.getElementById('published-title').textContent = state.curriculumTitle;
+        document.getElementById('published-description').textContent = state.curriculumDescription;
+        document.getElementById('published-breadcrumb').textContent = state.curriculumTitle;
+        document.getElementById('published-date').textContent = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        document.getElementById('published-visibility').textContent = visibility.charAt(0).toUpperCase() + visibility.slice(1);
+
+        // Render content
+        document.getElementById('published-content').innerHTML = marked.parse(state.curriculumMarkdown);
+
+        // Extract and render objectives
+        const objectivesMatch = state.curriculumMarkdown.match(/(?:objectives|goals|outcomes)[:\s]*\n((?:[-*]\s+.+\n?)+)/im);
+        if (objectivesMatch) {
+            const objectives = objectivesMatch[1].match(/[-*]\s+(.+)/g) || [];
+            document.getElementById('published-objectives').innerHTML = `
+                <h3 class="text-brand-purple font-bold text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined">lightbulb</span>
+                    Learning Objectives
+                </h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700">
+                    ${objectives.slice(0, 6).map(obj => `
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                            ${obj.replace(/^[-*]\s+/, '')}
+                        </li>`).join('')}
+                </ul>`;
+        }
+
+        navigateView('published');
+    }
+
+    // ---- FORK / REMIX ----
+    function handleForkRemix() {
+        document.getElementById('vision').value = state.vision + '\n\n[REMIX] Building upon: ' + state.curriculumTitle;
+        navigateView('generate');
+        document.getElementById('generate-heading').textContent = 'Remix Curriculum';
+    }
+
+    // ---- CREATE NEW ----
+    function handleCreateNew() {
+        // Reset state
+        state.curriculumMarkdown = '';
+        state.curriculumTitle = '';
+        state.curriculumDescription = '';
+        state.chatMessages = [];
+        state.conversationHistory = [];
+        state.vision = '';
+        state.selectedCategory = '';
+
+        document.getElementById('vision').value = '';
+        document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('selected'));
+        document.getElementById('generate-heading').textContent = 'Create New Curriculum';
+        document.getElementById('chat-container').innerHTML = '';
+        navigateView('generate');
+    }
+
+    // ---- SHARE ----
+    function handleShare(type) {
+        if (type === 'link') {
+            navigator.clipboard?.writeText(window.location.href)
+                .then(() => alert('Link copied to clipboard!'))
+                .catch(() => alert('URL: ' + window.location.href));
+        } else if (type === 'share') {
+            if (navigator.share) {
+                navigator.share({
+                    title: state.curriculumTitle,
+                    text: state.curriculumDescription,
+                    url: window.location.href
+                });
+            } else {
+                alert('Sharing is not supported in this browser. Copy the URL instead.');
+            }
+        } else {
+            alert('Curriculum bookmarked!');
+        }
+    }
+
+    // ---- INIT ----
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check for config
+        if (typeof CONFIG === 'undefined') {
+            console.warn('⚠️ config.js not found. Please create config.js from config.example.js');
+        }
+    });
+</script>
+
+</body>
+</html>

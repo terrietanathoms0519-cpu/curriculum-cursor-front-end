@@ -1,0 +1,6 @@
+# Secrets
+config.js
+
+# OS
+.DS_Store
+Thumbs.db
