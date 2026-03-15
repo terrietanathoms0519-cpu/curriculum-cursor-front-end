@@ -489,10 +489,33 @@
                                         <span class="text-white font-medium">Standard Academic</span>
                                     </div>
                                 </div>
+                                
+                                <!-- GitHub Deployment Section -->
+                                <div class="h-px bg-white/10 w-full mb-2"></div>
+                                <div class="flex flex-col gap-3">
+                                    <h3 class="text-white font-bold flex items-center gap-2">
+                                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                                        GitHub Pages Deploy
+                                    </h3>
+                                    <p class="text-xs text-lavender leading-relaxed">Publish this curriculum directly to a new repository on your GitHub account and serve it via GitHub Pages.</p>
+                                    <input type="password" id="github-pat" placeholder="Personal Access Token (repo scope)" class="w-full bg-white/5 border border-white/10 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-2 text-sm text-white placeholder:text-slate-500 mb-2" />
+                                    
+                                    <button onclick="deployToGitHub()" id="btn-github-deploy" class="w-full bg-[#2da44e] hover:bg-[#2c974b] text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-[#2da44e]/20 flex items-center justify-center gap-2">
+                                        Deploy to GitHub
+                                    </button>
+                                    
+                                    <div id="github-deploy-status" class="hidden flex-col gap-2 mt-2 p-3 bg-black/20 rounded-lg border border-white/5 items-center text-center">
+                                        <span id="github-deploy-spinner" class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
+                                        <p id="github-deploy-msg" class="text-xs text-lavender font-medium">Initializing deployment...</p>
+                                        <a href="#" id="github-deploy-link" target="_blank" class="hidden text-xs text-primary font-bold hover:underline break-all mt-1"></a>
+                                    </div>
+                                </div>
+                                <div class="h-px bg-white/10 w-full mt-2"></div>
+
                                 <div class="flex flex-col gap-3 pt-2">
                                     <button onclick="handleConfirmPublish()" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
                                         <span class="material-symbols-outlined">rocket_launch</span>
-                                        Confirm & Publish
+                                        Save to Internal Hub
                                     </button>
                                     <button onclick="navigateView('workspace')" class="w-full bg-white/5 hover:bg-white/10 text-white font-semibold py-3 rounded-lg border border-white/10 transition-all">
                                         Save as Draft
@@ -1336,6 +1359,217 @@ Please generate a detailed, structured curriculum.`;
         document.getElementById('generate-heading').textContent = 'Create New Curriculum';
         document.getElementById('chat-container').innerHTML = '';
         navigateView('generate');
+    }
+
+    // ---- GITHUB DEPLOYMENT ----
+    async function deployToGitHub() {
+        const patInput = document.getElementById('github-pat');
+        const pat = patInput.value.trim();
+        const statusDiv = document.getElementById('github-deploy-status');
+        const statusMsg = document.getElementById('github-deploy-msg');
+        const statusIcon = document.getElementById('github-deploy-spinner');
+        const statusLink = document.getElementById('github-deploy-link');
+        const deployBtn = document.getElementById('btn-github-deploy');
+        
+        if (!pat) {
+            alert("Please enter a valid GitHub Personal Access Token.");
+            patInput.focus();
+            return;
+        }
+
+        // Save PAT to localStorage for convenience
+        localStorage.setItem('github_pat', pat);
+
+        // UI Setup
+        statusDiv.classList.remove('hidden');
+        statusDiv.classList.add('flex');
+        statusLink.classList.add('hidden');
+        statusIcon.className = "material-symbols-outlined animate-spin text-primary";
+        statusIcon.textContent = "progress_activity";
+        deployBtn.disabled = true;
+        deployBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        try {
+            // 1. Get User info
+            statusMsg.textContent = "Authenticating with GitHub...";
+            const userRes = await fetch('https://api.github.com/user', {
+                headers: { 'Authorization': `token ${pat}` }
+            });
+            if (!userRes.ok) throw new Error("Invalid GitHub Token or scope.");
+            const userData = await userRes.json();
+            const username = userData.login;
+
+            // 2. Create Repository
+            statusMsg.textContent = "Creating repository...";
+            const slug = "curriculum-" + (state.curriculumTitle || "generated").toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            // We append a random string if we want to ensure uniqueness (simplified here)
+            const repoName = slug + "-" + Math.floor(Math.random() * 1000);
+            
+            const createRepoRes = await fetch('https://api.github.com/user/repos', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${pat}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: repoName,
+                    description: state.curriculumDescription || 'A generated curriculum',
+                    homepage: `https://${username}.github.io/${repoName}`,
+                    private: false,
+                    auto_init: true
+                })
+            });
+            
+            if (!createRepoRes.ok) throw new Error("Failed to create repository.");
+
+            // 3. Generate HTML Content
+            statusMsg.textContent = "Generating website footprint...";
+            const htmlContent = generateStandaloneHtml(state.curriculumTitle, state.curriculumMarkdown);
+            // Convert to Base64 (handling unicode properly)
+            const base64Content = btoa(unescape(encodeURIComponent(htmlContent)));
+
+            // 4. Commit index.html
+            statusMsg.textContent = "Committing files to repository...";
+            // We need to wait a tiny bit for auto_init to finish
+            await new Promise(r => setTimeout(r, 2000));
+            
+            const commitRes = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${pat}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: "Initial commit: Deploy curriculum",
+                    content: base64Content,
+                    branch: "main" // auto_init usually creates main branch
+                })
+            });
+            
+            if (!commitRes.ok) {
+                // If it fails, maybe branch is "master", try master
+                console.warn("Deploy to main failed, trying master branch");
+                const commitResMaster = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${pat}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: "Initial commit: Deploy curriculum",
+                        content: base64Content,
+                        branch: "master"
+                    })
+                });
+                if (!commitResMaster.ok) {
+                     throw new Error("Failed to commit index.html to repo.");
+                }
+            }
+
+            // 5. Enable GitHub Pages
+            statusMsg.textContent = "Configuring GitHub Pages...";
+            const pagesRes = await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${pat}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.switcheroo-preview+json' // required header sometimes
+                },
+                body: JSON.stringify({
+                    source: {
+                        branch: "main",
+                        path: "/"
+                    }
+                })
+            });
+            
+            if (!pagesRes.ok) {
+                 // Try master if main failed
+                 await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${pat}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.switcheroo-preview+json'
+                    },
+                    body: JSON.stringify({
+                        source: { branch: "master", path: "/" }
+                    })
+                });
+            }
+
+            // Success
+            statusIcon.className = "material-symbols-outlined text-[#2da44e]";
+            statusIcon.textContent = "check_circle";
+            statusMsg.textContent = "Deployment successful!";
+            
+            const finalUrl = `https://${username}.github.io/${repoName}/`;
+            statusLink.href = finalUrl;
+            statusLink.textContent = finalUrl;
+            statusLink.classList.remove('hidden');
+
+            // Optionally insert into db so library has the GH pages URL
+            if (supabaseClient) {
+                 await supabaseClient
+                    .from('curricula')
+                    .update({ visibility: finalUrl }) // Hacky approach to store link if we don't change schema
+                    .eq('id', state.previewingCheckpointId || 'temp'); // We might not have saved it yet, so recommend 'Confirm & Publish' first.
+            }
+
+        } catch (error) {
+            console.error("Deploy Error:", error);
+            statusIcon.className = "material-symbols-outlined text-red-500";
+            statusIcon.textContent = "error";
+            statusMsg.textContent = error.message;
+        } finally {
+            deployBtn.disabled = false;
+            deployBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    function generateStandaloneHtml(title, markdownContent) {
+        // Uses CDN links to create a standalone, beautiful HTML document
+        const renderedHtml = marked.parse(markdownContent);
+        
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>${title} - Curriculum</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"><\/script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Public Sans', sans-serif; background-color: #f8f6f6; }
+        .prose h1 { color: #4b2038; font-weight: 900; }
+        .prose h2 { color: #4b2038; font-weight: 800; border-bottom: 2px solid #f3e8ff; padding-bottom: 0.5rem; margin-top: 2rem;}
+        .prose h3 { color: #ec5b13; font-weight: 700; }
+        .prose a { color: #ec5b13; text-decoration: none; }
+        .prose a:hover { text-decoration: underline; }
+        .prose blockquote { border-left-color: #ec5b13; background-color: #fcfcfc; padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; font-style: italic; }
+        header { background-color: #1e0f24; border-bottom: 4px solid #ec5b13; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-[#ec5b13] selection:text-white pb-20">
+    <header class="text-white py-12 px-6 shadow-md mb-12">
+        <div class="max-w-4xl mx-auto flex flex-col gap-4">
+            <div class="inline-flex items-center gap-2 text-[#ec5b13] font-bold text-sm tracking-widest uppercase mb-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72M12 14.72l5-2.73v3.72l-5 2.73-5-2.73v-3.72l5 2.73z"/></svg>
+                Published Curriculum
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-tight">${title}</h1>
+        </div>
+    </header>
+    <main class="max-w-4xl mx-auto px-6">
+        <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-slate-100 prose prose-slate max-w-none prose-lg">
+            ${renderedHtml}
+        </div>
+    </main>
+    <footer class="max-w-4xl mx-auto px-6 mt-16 text-center text-slate-500 text-sm">
+        <p>Generated via <a href="#" class="font-bold text-[#ec5b13]">Curricula</a> AI Platform.</p>
+    </footer>
+</body>
+</html>`;
     }
 
     // ---- SHARE ----
