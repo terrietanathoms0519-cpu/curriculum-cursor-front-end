@@ -1361,6 +1361,34 @@ Please generate a detailed, structured curriculum.`;
         navigateView('generate');
     }
 
+    // ---- FORK / REMIX ----
+    function handleForkRemix() {
+        // State already contains the current curriculumTitle, curriculumMarkdown, etc. from rendering the publish view.
+        state.vision = "Remixed from: " + state.curriculumTitle;
+        
+        // Reset chat and history
+        state.chatMessages = [];
+        state.checkpoints = [];
+        state.previewingCheckpointId = null;
+        
+        // Define base history from which further edits will append
+        const systemPrompt = "You are an expert curriculum designer.";
+        state.conversationHistory = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Please refine this curriculum:\n\n${state.curriculumMarkdown}` }
+        ];
+
+        // Add initial checkpoint
+        addCheckpoint('Forked Curriculum', state.curriculumMarkdown);
+
+        // Add greeting message
+        addChatMessage('ai', `I've opened a remix of "${state.curriculumTitle}". Let me know what edits you'd like to make!`);
+
+        // Navigate and render
+        navigateView('workspace');
+        renderCurriculum();
+    }
+
     // ---- GITHUB DEPLOYMENT ----
     async function deployToGitHub() {
         const patInput = document.getElementById('github-pat');
@@ -1675,7 +1703,7 @@ Please generate a detailed, structured curriculum.`;
                             <span class="material-symbols-outlined text-primary text-xl">school</span>
                         </div>
                         <span class="text-xs font-bold px-2 py-1 rounded bg-white/5 text-lavender group-hover:bg-primary/20 group-hover:text-primary transition-colors cursor-pointer flex items-center gap-1" onclick="openFromLibrary('${curr.id}')">
-                            <span class="material-symbols-outlined text-[14px]">edit</span> Edit
+                            <span class="material-symbols-outlined text-[14px]">fork_right</span> Fork
                         </span>
                     </div>
                     <h3 class="text-white font-bold text-lg leading-tight mb-2 line-clamp-2" title="${curr.title.replace(/"/g, '&quot;')}">${curr.title}</h3>
